@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./gotaAgua.png" type="image/x-icon">
+    <title>Toma agua</title>
+</head>
+<body>
+    <p>
+        Esta app se encarga de darte la cantidad de vasos de agua que debes tomar tomando en cuenta
+        la masa corporal o mal dicha "peso" y el volumen del recipiente
+    </p>
+    <form id="findWater">
+    <!-- Recibe peso  -->
+    <label for="txfQuantityMass">Ingrese su peso : </label>
+    <input id="txfQuantityMass" type="number" min="1">
+    <input id="kgAndMl" class="rbtnMasa" type="radio" name="options" value="kg" checked>
+    <label>Kilogramos y Militros</label>
+
+    <input id="lbAndOz" class="rbtnMasa" type="radio" name="options" value="lb">
+    <label>Libras y Onzas</label>
+    <!-- ------------------------------------------------------------------------------------------------- -->
+    
+    <!-- Recibe volumen de vaso -->
+    <label for="txfQuantityVolume">Ingrese el volumen del recipiente : </label>
+    <input type="number" id="txfQuantityVolume" min="1">
+    
+    <!-- ------------------------------------------------------------------------------------------------- -->
+    <button id="btnCalculate">Calcular</button>
+    </form>
+    <div>
+        <p id="result">RE: </p>
+    </div>
+    <script>
+
+        const $txfQuantityMass = document.getElementById("txfQuantityMass");
+        const $txfQuantityVolume = document.getElementById("txfQuantityVolume");
+
+        const getQuantityGlass = function(mass,volume,denominator){
+            return ((mass / denominator) * 250) / volume;
+        }
+
+        const getNumberOrString = function (numberOrString, param, otherCharactersBefore = "", otherCharactersAfter = ""){
+            return "string" === numberOrString.toLowerCase() ? 
+                otherCharactersBefore + (new String(param)) + otherCharactersAfter : 
+                new Number(param);
+        }
+
+        const getPercentageAdditional = function(float, decimals = 0, numberOrString){ // devuelve 0,1 y 0,99999999999
+            const SYMBOL_PERCENTAJE = "%";
+            float = float % 1;
+            if (float === 0) return getNumberOrString(numberOrString, float, "", SYMBOL_PERCENTAJE);
+            float = float * 100;
+            return getNumberOrString(numberOrString, float.toFixed(decimals) , "", SYMBOL_PERCENTAJE); 
+        }
+            document.getElementById("btnCalculate").addEventListener("click", function(){
+            event.preventDefault();
+            const $result = document.getElementById("result");
+            let kgAndML= document.getElementById("kgAndMl").checked;
+            let lbAndOz= document.getElementById("lbAndOz").checked;
+
+            if(kgAndML === false && lbAndOz === false) {
+                alert("No ha seleccionado ninguna opcion"); 
+                return ;
+            }
+            
+            let mass = parseInt($txfQuantityMass.value,10);
+            
+            let volume = parseInt($txfQuantityVolume.value,10);
+            
+            let glass = getQuantityGlass(mass, volume, kgAndML ? 7:16);
+            
+            $result.textContent = "la cantidad de vasos con capacidad para " + volume + (kgAndML ? "mL":"oz") +
+                " que debe consumir teniendo en cuenta que su masa corporal actual es " + mass + (kgAndML ? "kg":"lb") +" son " + 
+                Math.round(glass) +" y un "+getPercentageAdditional(glass,2,"string") + " de esos " + volume + (kgAndML ? "mL":"oz");
+            });
+            
+            document.getElementById("btnCalculate").addEventListener("click", function(){
+                let $otherLabel = document.querySelector("#findWater label:nth-child(1)");
+                const $label = document.createElement("label");
+                let isEmpty = $txfQuantityVolume.value.trim() === "";
+                $label.style.display = "none";
+                if(( $txfQuantityMass.value.trim() === "" ) || ( isEmpty )) {
+                    $label.style.color = "#f00"
+                    $label.textContent = "No ha ingresado ningún valor";
+                    $label.style.display = "inline";
+                    
+                    $otherLabel = isEmpty ? document.querySelector("#findWater label:nth-child(4)"): $otherLabel;
+
+                    document.insertBefore($otherLabel, $label);
+                }
+                document.removeChild($label);
+            });
+    </script>
+</body>
+</html>
